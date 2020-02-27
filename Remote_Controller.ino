@@ -16,6 +16,13 @@
 //VCC = 5V
 //220 ohm resistor b/t 5V and LED+
 //pot wiper to V0
+//Xbee DOUT = RXI
+//Xbee DIN = TX0
+//Joystick Vrx = A0
+//Joystick Vry = A1
+//Power supply Vcc = VCC
+//Power supply ground = GND
+
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
 //joystick pins

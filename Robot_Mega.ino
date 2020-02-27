@@ -2,12 +2,16 @@
 //Processes remote control data, then outputs to motor driver in order to control robot
 //Interfaces with metal detector to determine is metal is detected
 
+//USB port plugged into computer
+//Xbee DOUT plugged into arduino RX1 (19)
+//Xbee DIN plugged into arduino TX1 (18)
+
 #include "arduinoFFT.h"  //include FFT library
 
 //FFT variables
 //from https://www.norwegiancreations.com/2019/03/arduino-fft-pt-2-improving-the-hardware-for-real-time-analysis/
 #define SAMPLES 512               //Must be a power of 2
-#define SAMPLING_FREQUENCY 6000  //Hz
+#define SAMPLING_FREQUENCY 6400  //Hz
 #define REFRESH_RATE 10           //Hz
 #define ARDUINO_IDE_PLOTTER_SIZE 500
 arduinoFFT FFT = arduinoFFT();
@@ -81,15 +85,16 @@ void loop()
     }
   }
 
+  //checks if packet is valid then stores joystick positions
+  validate_packet();
   delay(50);
   digitalWrite(LED_BUILTIN,LOW);
 
+  //controls motors based on remote controller input
+  motor_control();
+
   //takes fft of metal detector input
   fft();
-
-  //checks if packet is valid then stores joystick positions
-  validate_packet();
-
 
 }
 
@@ -113,6 +118,10 @@ void validate_packet(){
     joy_data.jx = rx_buffer[1];
     joy_data.jy = rx_buffer[2];
   }
+
+}
+
+void motor_control(){
 
 }
 
