@@ -139,7 +139,7 @@ void fft(){
   peak = FFT.MajorPeak(vReal, SAMPLES, SAMPLING_FREQUENCY);  //determines strongest frequency in signal
 
   //prints out peak frequency
-  Serial.print("Peak frequency:")
+  Serial.print("Peak frequency:");
   Serial.println(peak);
 
   //not using these print results, they plot it to the arduino plotter
