@@ -2,6 +2,23 @@
 //Arduino Pro Mini (remote controller)
 //Joystick data is read into the arduino and sent to the robot in order to control it
 
+#include <LiquidCrystal.h>
+
+//LCD pins
+//RS pin = pin 12
+//Enable pin = pin 11
+//D4 = pin 5
+//D5 = pin 4
+//D6 = pin 3
+//D7 = pin 2
+//R/W = gnd
+//VSS = gnd
+//VCC = 5V
+//220 ohm resistor b/t 5V and LED+
+//pot wiper to V0
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+//joystick pins
 int x1pin = A0;           //joystick x pin connected to arduino
 int y1pin = A1;           //joystick y pin connected to arduino
 
@@ -29,14 +46,20 @@ void setup() {
   // initialize both serial ports:
   Serial.begin(9600);  //intitializes communication with xbee pro s2b
 
+  //LCD screen setup
+  // set up the LCD's number of columns and rows:
+  lcd.begin(16, 2);
+  // Print a message to the LCD.
+  lcd.print("Starting up!");
+
   //nitializes joystick positions
   output_data.jx = 0;
   output_data.jy = 0;
-  
+
   pinMode(LED_BUILTIN, OUTPUT);   //LED used to indicate when data is sent from joystick
 }
 
-void loop() 
+void loop()
 {
 
   //read in data from joystick (0 to 1023 range)
@@ -64,8 +87,9 @@ void loop()
   {
     send_data = false;
     digitalWrite(LED_BUILTIN,LOW);   //used for debugging purposes
+    lcd.clear();
+    lcd.print("No joystick change");
   }
-
 
   //where data is actually sent if joystick position has changed
   //data is written to xbee module through serial connection
@@ -81,8 +105,12 @@ void loop()
     prev_data.jx = output_data.jx;   //used to calculate whether joystick position has changed
     prev_data.jy = output_data.jy;
     digitalWrite(LED_BUILTIN,HIGH);  //indicates if joystick has been moved
-    
-    //Serial.println("Sent Data");   //for debugging with computer
+    lcd.clear();
+    lcd.print("Sent x:");
+    lcd.print(output_data.jx);
+    lcd.setCursor(0,1);
+    lcd.print("Sent y:");
+    lcd.print(output_data.jy);
   }
 
   delay(20);          //makes program run better
