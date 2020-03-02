@@ -34,6 +34,7 @@ int rx_buffer[3] = {0,0,0};     //incoming data from remote controller
 int rx_buffer_size = 3;
 int buffer_counter = 0;
 bool packet_good = true;
+bool packet_recv = false;
 
 //Used for flow control to/from xbee UART
 int rts_pin = 2;
@@ -52,7 +53,7 @@ void setup() {
   // initialize both serial ports
   //Serial (Serial0) used to communicate with computer
   //Serial1 used to communicate with xbee pro s2b
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial1.begin(9600);
 
   //pin used for rts flow control on xbee pro s2b
@@ -75,40 +76,52 @@ void setup() {
 void loop()
 {
 
+  //while (Serial1.available() < 3);
+  
   if (Serial1.available())
   {
-    while (buffer_counter < rx_buffer_size)
-    {
-      digitalWrite(LED_BUILTIN,HIGH);
-      rx_buffer[buffer_counter] = Serial.read();
-      buffer_counter++;
-    }
+    int test_byte = Serial1.read();
+    //Serial.println(test_byte);
+    rx_buffer[buffer_counter] = test_byte;
+    buffer_counter++;
   }
 
-  //checks if packet is valid then stores joystick positions
-  validate_packet();
-  delay(50);
-  digitalWrite(LED_BUILTIN,LOW);
+  if (buffer_counter >= 3){
+    buffer_counter = 0;
+//    Serial.println(rx_buffer[0]);
+//    Serial.println(rx_buffer[1]);
+//    Serial.println(rx_buffer[2]);
+
+    //checks if packet is valid then stores joystick positions
+    validate_packet();
+  }
+  
+  
+  
+  //delay(50);
+  
 
   //controls motors based on remote controller input
   motor_control();
 
   //takes fft of metal detector input
-  fft();
-
+  //fft();
 }
 
 void validate_packet(){
   if(rx_buffer[0] != 255)
   {
     packet_good = false;
+    Serial.println("Packet verified bad");
   }
   else if(rx_buffer[1] == 255 || rx_buffer[2] == 255)
   {
     packet_good = false;
+    Serial.println("Packet verified bad");
   }
   else
   {
+    Serial.println("Packet verified good");
     packet_good = true;
   }
 
@@ -117,6 +130,9 @@ void validate_packet(){
     joy_data.packet_start = rx_buffer[0];
     joy_data.jx = rx_buffer[1];
     joy_data.jy = rx_buffer[2];
+    Serial.println(joy_data.packet_start);
+    Serial.println(joy_data.jx);
+    Serial.println(joy_data.jy);
   }
 
 }
@@ -148,8 +164,8 @@ void fft(){
   peak = FFT.MajorPeak(vReal, SAMPLES, SAMPLING_FREQUENCY);  //determines strongest frequency in signal
 
   //prints out peak frequency
-  Serial.print("Peak frequency:");
-  Serial.println(peak);
+  //Serial.print("Peak frequency:");
+  //Serial.println(peak);
 
   //not using these print results, they plot it to the arduino plotter
   //PRINT RESULTS
