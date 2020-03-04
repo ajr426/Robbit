@@ -30,6 +30,15 @@ XBeeResponse response = XBeeResponse();
 ZBRxResponse rx = ZBRxResponse();
 ModemStatusResponse msr = ModemStatusResponse();
 
+//remote data of left and right joystick y positions
+struct remote_data
+{
+  int jyl;
+  int jyr;
+};
+
+remote_data joystick;
+
 void setup() {  
   // start serial
   Serial1.begin(9600);
@@ -51,7 +60,7 @@ void loop() {
     
     if (xbee.getResponse().isAvailable()) {
       // got something
-      Serial.println("Got something");
+      //Serial.println("Got something");
       
       if (xbee.getResponse().getApiId() == ZB_RX_RESPONSE) {
         // got a zb rx packet
@@ -59,11 +68,17 @@ void loop() {
         // now fill our zb rx class
         xbee.getResponse().getZBRxResponse(rx);
       
-        Serial.println("Got an rx packet!");
+        //Serial.println("Got an rx packet!");
             
         if (rx.getOption() == ZB_PACKET_ACKNOWLEDGED) {
             // the sender got an ACK
-            Serial.println("packet acknowledged");
+            //Serial.println("packet acknowledged");
+          joystick.jyl = rx.getData()[0];
+          joystick.jyr = rx.getData()[1];
+
+//          Serial.println(joystick.jyl);
+//          Serial.println(joystick.jyr);
+            
         } else {
           Serial.println("packet not acknowledged");
         }
@@ -75,7 +90,7 @@ void loop() {
         Serial.println(rx.getPacketLength(), DEC);
         
          for (int i = 0; i < rx.getDataLength(); i++) {
-          Serial.print("payload [");
+         Serial.print("payload [");
           Serial.print(i, DEC);
           Serial.print("] is ");
           Serial.println(rx.getData()[i], HEX);
@@ -92,4 +107,5 @@ void loop() {
       Serial.print("error code:");
       Serial.println(xbee.getResponse().getErrorCode());
     }
+    
 }
