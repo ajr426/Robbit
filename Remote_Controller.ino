@@ -113,8 +113,10 @@ void loop()
   {
     send_data = false;
     digitalWrite(LED_BUILTIN,LOW);   //used for debugging purposes
-    lcd.clear();
-    lcd.print("No joystick change");
+    //lcd.clear();
+    //lcd.print("No joystick change");
+    diffx = 0;
+    diffy = 0;
   }
 
   //where data is actually sent if joystick position has changed
@@ -130,6 +132,10 @@ void loop()
     lcd.setCursor(0,1);
     lcd.print("Sent y:");
     lcd.print(payload[1]);
+
+    delay(200);
+    lcd.clear();
+    
     // after sending a tx request, we expect a status response
     // wait up to half second for the status response
     if (xbee.readPacket(500)) {
@@ -155,9 +161,13 @@ void loop()
       // local XBee did not provide a timely TX Status Response -- should not happen
 
     }
-
+    
+  digitalWrite(LED_BUILTIN,LOW);  //indicates if joystick has been moved
+  prev_data.jx = raw_data.jx;
+  prev_data.jy = raw_data.jy;
   }
-
+  
+  
   delay(20);          //makes program run better
 
 }
