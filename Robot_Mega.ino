@@ -6,8 +6,16 @@
 //Xbee DOUT plugged into arduino RX1 (19)
 //Xbee DIN plugged into arduino TX1 (18)
 
-#include "arduinoFFT.h"  //include FFT library
-#include <Xbee.h>        //include xbee comms library
+#include "arduinoFFT.h"             //include FFT library
+#include <Xbee.h>                   //include xbee comms library
+#include <Sabertooth.h>             //Sabertooth motor controller library
+#include <SabertoothSimplified.h>   //Sabertooth motor controller library
+
+//Motor controller variables
+SabertoothSimplified ST; // The Sabertooth is on address 133. Pins 1,4,6 down (independent mode) from WIZARD. We'll name its object ST.
+int powerleft=0; //actual power
+int powerright=0; //actual power
+
 
 //FFT variables
 //from https://www.norwegiancreations.com/2019/03/arduino-fft-pt-2-improving-the-hardware-for-real-time-analysis/
@@ -136,7 +144,74 @@ void rf_recieve(){
 
 //used to control drive motors based on joystick input
 void motor_control(){
+  // FIND DESIRED MOTOR SPEEDS
+  // LEFT MOTOR
+  if(joystick.jyl < 170){
+    while(powerleft >= -127){
+      powerleft--;
+      ST.motor(2, powerleft); //left motor
+      delay(10);
+    }
+  }
 
+  else if(joystick.jyl >= 170 && joystick.jyl < 210){
+    if(powerleft < 0){
+      while(powerleft<0){
+        powerleft++;
+        ST.motor(2, powerleft); //left motor
+        delay(10);
+      }
+    }
+
+    if(powerleft>0){
+      while(powerleft>0){
+        powerleft--;
+        ST.motor(2, powerleft); //left motor
+        delay(10);
+      }
+    }
+  }
+
+  else if(joystick.jyl>=210){
+    while(powerright<=127){
+      powerright++;
+      ST.motor(1, powerright); //left motor
+      delay(10);
+     }
+  }
+
+  // RIGHT MOTOR
+  if(joystick.jyr<170){
+    while(powerright>=-127){
+      powerright--;
+      ST.motor(1, powerright); //right motor
+      delay(10);
+    }
+  }
+
+  else if(joystick.jyr>=170 && joystick.jyr<210){
+    if(powerright<0){
+      while(powerright<0){
+        powerright++;
+        ST.motor(1, powerright); //right motor
+        delay(10);
+      }
+    }
+    if(powerright>0){
+      while(powerright>0){
+        powerright--;
+        ST.motor(1, powerright); //right motor
+        delay(10);
+      }
+    }
+  }
+  else if(joystick.jyr>=210){
+    while(powerright<=127){
+      powerright++;
+      ST.motor(1, powerright); //right motor
+      delay(10);
+    }
+  }
 }
 
 //fft of metal detector audio signal
