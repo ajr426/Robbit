@@ -135,7 +135,7 @@ void loop()
 
     delay(200);
     lcd.clear();
-    
+
     // after sending a tx request, we expect a status response
     // wait up to half second for the status response
     if (xbee.readPacket(500)) {
@@ -161,13 +161,29 @@ void loop()
       // local XBee did not provide a timely TX Status Response -- should not happen
 
     }
-    
+
   digitalWrite(LED_BUILTIN,LOW);  //indicates if joystick has been moved
   prev_data.jx = raw_data.jx;
   prev_data.jy = raw_data.jy;
   }
-  
-  
+
+
   delay(20);          //makes program run better
 
+}
+
+void read_joysticks(){
+
+}
+
+void rf_transmit(){
+
+}
+
+void rf_recieve(){
+
+}
+
+void update_lcd(){
+  
 }
