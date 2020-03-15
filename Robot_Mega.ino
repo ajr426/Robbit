@@ -7,12 +7,13 @@
 //Xbee DIN plugged into arduino TX1 (18)
 
 #include "arduinoFFT.h"             //include FFT library
-#include <Xbee.h>                   //include xbee comms library
+#include <XBee.h>                   //include xbee comms library
 #include <Sabertooth.h>             //Sabertooth motor controller library
 #include <SabertoothSimplified.h>   //Sabertooth motor controller library
 
 //Motor controller variables
-SabertoothSimplified ST; // The Sabertooth is on address 133. Pins 1,4,6 down (independent mode) from WIZARD. We'll name its object ST.
+//Serial 2 pins: 17(RX), 16(TX)
+SabertoothSimplified ST(Serial2); // The Sabertooth is on address 133. Pins 1,4,6 down (independent mode) from WIZARD. We'll name its object ST.
 int powerleft=0; //actual power
 int powerright=0; //actual power
 
@@ -75,6 +76,8 @@ void setup() {
   // initialize both serial ports
   Serial.begin(9600);   //Serial (Serial0) used to communicate with computer
   Serial1.begin(9600);  //Serial1 used to communicate with xbee pro s2b
+  Serial2.begin(9600);  //Serial2 communicates with Sabertooth motor driver, trying this out
+  // SabertoothTXPinSerial.begin(9600); //If Serial2.begin doesn't work, try this
 
   xbee.begin(Serial1);  //assign Serial1 to xbee object use
 
@@ -82,7 +85,8 @@ void setup() {
 
   //FFT setup
   sampling_period_us = round(1000000*(1.0/SAMPLING_FREQUENCY));
-  refresh_period_us = round(1000000*(1.0/REFRESH_RATE));
+  //refresh_period_us = round(1000000*(1.0/REFRESH_RATE));
+  //not using refresh_period_us because arduino will just run fft whenever it gets to fft() in loop
 
   pinMode(analogpin, INPUT);   //setup pin for metal detector input
 
@@ -126,7 +130,7 @@ void rf_recieve(){
           //Serial.println("packet acknowledged");
           joystick.jyl = rx.getData()[0];
           joystick.jyr = rx.getData()[1];
-          joystick.rx_str = rx.getRssi();
+          //joystick.rx_str = rx.getRssi(); //just an idea for getting recieve strength
           Serial.println(joystick.jyl);
           Serial.println(joystick.jyr);
           Serial.println(joystick.rx_str);
@@ -146,23 +150,21 @@ void rf_recieve(){
 void motor_control(){
   // FIND DESIRED MOTOR SPEEDS
   // LEFT MOTOR
-  if(joystick.jyl < 170){
-    while(powerleft >= -127){
-      powerleft--;
-      ST.motor(2, powerleft); //left motor
-      delay(10);
+  if(joystick.jyl<170){
+    while(powerleft>=-127){
+    powerleft--;
+    ST.motor(2, powerleft); //left motor
+    delay(10);
     }
   }
-
-  else if(joystick.jyl >= 170 && joystick.jyl < 210){
-    if(powerleft < 0){
+  else if(joystick.jyl>=170 && joystick.jyl<210){
+    if(powerleft<0){
       while(powerleft<0){
         powerleft++;
         ST.motor(2, powerleft); //left motor
         delay(10);
       }
     }
-
     if(powerleft>0){
       while(powerleft>0){
         powerleft--;
@@ -171,13 +173,12 @@ void motor_control(){
       }
     }
   }
-
   else if(joystick.jyl>=210){
     while(powerright<=127){
       powerright++;
       ST.motor(1, powerright); //left motor
       delay(10);
-     }
+    }
   }
 
   // RIGHT MOTOR
@@ -188,7 +189,6 @@ void motor_control(){
       delay(10);
     }
   }
-
   else if(joystick.jyr>=170 && joystick.jyr<210){
     if(powerright<0){
       while(powerright<0){
@@ -212,6 +212,26 @@ void motor_control(){
       delay(10);
     }
   }
+
+  //******************Motor Test Code**********************//
+  //  int power=0;
+  //  //for (power = -127; power <= 127; power ++)
+  //  {
+  //  ST.motor(1, power); //right motor
+  //  delay(20);
+  //
+  //  ST.motor(2, power); //left motor
+  //  delay(20);
+  //  }
+  //  //for (power = 127; power >= -127; power --)
+  //  {
+  //  ST.motor(1, power); //right motor
+  //  delay(20);
+  //
+  //  ST.motor(2, power); //left motor
+  //  delay(20);
+  //  }
+  //********************************************************//
 }
 
 //fft of metal detector audio signal
